@@ -1,0 +1,62 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-backend
+  namespace: task-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-manager-backend
+  template:
+    metadata:
+      labels:
+        app: task-manager-backend
+    spec:
+      containers:
+        - name: backend
+          image: aaira1902/task-manager-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: task-manager-config
+                  key: API_PORT
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: task-manager-config
+                  key: NODE_ENV
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: task-manager-config
+                  key: MONGO_URI
+            - name: COGNITO_USER_POOL_ID
+              valueFrom:
+                secretKeyRef:
+                  name: task-manager-secrets
+                  key: COGNITO_USER_POOL_ID
+            - name: COGNITO_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: task-manager-secrets
+                  key: COGNITO_CLIENT_ID
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-manager-backend
+  namespace: task-manager
+spec:
+  selector:
+    app: task-manager-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP

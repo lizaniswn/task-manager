@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task-manager-ingress
+  namespace: task-manager
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: task-manager-backend
+                port:
+                  number: 5000
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: task-manager-frontend
+                port:
+                  number: 80

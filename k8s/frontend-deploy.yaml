@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-frontend
+  namespace: task-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: task-manager-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: aaira1902/task-manager-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: task-manager-config
+                  key: REACT_APP_API_BASE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-manager-frontend
+  namespace: task-manager
+spec:
+  selector:
+    app: task-manager-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
