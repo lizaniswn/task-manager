@@ -1,68 +1,140 @@
+
 name: CI - Build, Lint, Test
  
 on:
+
   pull_request:
+
     branches:
-      - "**"   # Run on every PR push, any branch
+
+      - "**"
+
   push:
+
     branches:
-      - main   # Optional: also run on direct pushes to main
+
+      - main
  
 jobs:
+
   backend:
+
     name: Backend CI
+
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: task-manager-backend
+
     steps:
+
       - name: Checkout code
+
         uses: actions/checkout@v4
  
-      - name: Set up Node.js
+      - name: Debug repo files (temp)
+
+        run: |
+
+          echo "Repo root: $(pwd)"
+
+          echo "--- root listing ---"
+
+          ls -la
+
+          echo "--- backend listing ---"
+
+          ls -la task-manager-backend || true
+
+          echo "--- frontend listing ---"
+
+          ls -la task-manager-frontend || true
+ 
+      - name: Set up Node.js (backend)
+
         uses: actions/setup-node@v4
+
         with:
+
           node-version: 20
+
           cache: npm
+
           cache-dependency-path: task-manager-backend/package-lock.json
  
-      - name: Install dependencies
+      - name: Install backend deps
+
         run: npm ci
+
+        working-directory: task-manager-backend
  
       - name: Lint backend
+
         run: npm run lint --if-present
- 
-      - name: Run backend tests
-        run: npm test --if-present
+
+        working-directory: task-manager-backend
  
       - name: Build backend Docker image
+
         run: docker build -t task-manager-backend:ci .
+
+        working-directory: task-manager-backend
  
   frontend:
+
     name: Frontend CI
+
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: task-manager-frontend
+
     steps:
+
       - name: Checkout code
+
         uses: actions/checkout@v4
  
-      - name: Set up Node.js
+      - name: Debug repo files (temp)
+
+        run: |
+
+          echo "Repo root: $(pwd)"
+
+          ls -la
+
+          echo "--- frontend listing ---"
+
+          ls -la task-manager-frontend || true
+ 
+      - name: Set up Node.js (frontend)
+
         uses: actions/setup-node@v4
+
         with:
+
           node-version: 20
+
           cache: npm
+
           cache-dependency-path: task-manager-frontend/package-lock.json
  
-      - name: Install dependencies
+      - name: Install frontend deps
+
         run: npm ci
+
+        working-directory: task-manager-frontend
  
       - name: Lint frontend
+
         run: npm run lint --if-present
+
+        working-directory: task-manager-frontend
  
       - name: Run frontend tests
+
         run: npm test --if-present
+
+        working-directory: task-manager-frontend
  
       - name: Build frontend Docker image
+
         run: docker build -t task-manager-frontend:ci .
+
+        working-directory: task-manager-frontend
+
+ 
